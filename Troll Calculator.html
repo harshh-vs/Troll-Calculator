@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Troll Calculator 3000 — Neon</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #05050e;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .nc-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      background: #0a0a0f;
+      border-radius: 16px;
+      padding: 2rem 1rem;
+    }
+
+    .nc-title {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: #0ff;
+      text-shadow: 0 0 8px #0ff, 0 0 20px #0ff;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: neonPulse 2.5s ease-in-out infinite;
+    }
+
+    .nc-title .glitchy {
+      font-size: 10px;
+      color: #ff2d95;
+      text-shadow: 0 0 8px #ff2d95;
+      letter-spacing: 2px;
+    }
+
+    .nc-body {
+      background: #0d0d18;
+      border: 1px solid rgba(0, 255, 255, 0.25);
+      border-radius: 16px;
+      padding: 1.25rem;
+      width: 320px;
+      box-shadow: 0 0 30px rgba(0,255,255,0.06), inset 0 0 30px rgba(0,0,0,0.1);
+    }
+
+    .nc-display {
+      background: #050510;
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      min-height: 78px;
+      text-align: right;
+      box-shadow: 0 0 18px rgba(0,255,255,0.12), inset 0 0 12px rgba(0,255,255,0.03);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nc-display::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: #0ff;
+      opacity: 0.4;
+    }
+
+    .scanline {
+      pointer-events: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,255,255,0.015) 4px
+      );
+      border-radius: 10px;
+    }
+
+    .nc-disp-input {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 22px;
+      color: #0ff;
+      text-shadow: 0 0 8px #0ff, 0 0 20px rgba(0,255,255,0.25);
+      word-break: break-all;
+      min-height: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nc-disp-hint {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: rgba(255, 45, 149, 0.5);
+      margin-top: 5px;
+      min-height: 16px;
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .nb {
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      background: #0d0d1f;
+      color: #0ff;
+      border-radius: 10px;
+      height: 56px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.1s, box-shadow 0.1s, transform 0.08s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 0 6px rgba(0,255,255,0.5);
+      box-shadow: 0 0 6px rgba(0,255,255,0.06);
+      padding: 0;
+    }
+
+    .nb:hover {
+      background: rgba(0,255,255,0.08);
+      box-shadow: 0 0 14px rgba(0,255,255,0.3);
+      border-color: rgba(0,255,255,0.7);
+    }
+
+    .nb:active {
+      transform: scale(0.93);
+      box-shadow: 0 0 22px rgba(0,255,255,0.55);
+    }
+
+    .nb.op {
+      color: #ff2d95;
+      border-color: rgba(255, 45, 149, 0.3);
+      text-shadow: 0 0 8px rgba(255, 45, 149, 0.6);
+      box-shadow: 0 0 6px rgba(255, 45, 149, 0.1);
+    }
+
+    .nb.op:hover {
+      background: rgba(255, 45, 149, 0.08);
+      box-shadow: 0 0 16px rgba(255, 45, 149, 0.4);
+      border-color: rgba(255, 45, 149, 0.7);
+    }
+
+    .nb.clear {
+      color: #ff4444;
+      border-color: rgba(255, 68, 68, 0.3);
+      text-shadow: 0 0 8px rgba(255, 68, 68, 0.55);
+    }
+
+    .nb.clear:hover {
+      background: rgba(255, 68, 68, 0.08);
+      box-shadow: 0 0 14px rgba(255, 68, 68, 0.35);
+      border-color: rgba(255, 68, 68, 0.7);
+    }
+
+    .nb.eq {
+      background: rgba(0,255,255,0.09);
+      border: 1px solid #0ff;
+      color: #0ff;
+      font-size: 22px;
+      box-shadow: 0 0 14px rgba(0,255,255,0.35), inset 0 0 8px rgba(0,255,255,0.05);
+    }
+
+    .nb.eq:hover {
+      background: rgba(0,255,255,0.16);
+      box-shadow: 0 0 28px rgba(0,255,255,0.65);
+    }
+
+    .nb.zero { grid-column: span 2; }
+
+    .nc-banner {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: #ff2d95;
+      text-align: center;
+      max-width: 320px;
+      min-height: 36px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(255, 45, 149, 0.5);
+      transition: opacity 0.3s;
+      line-height: 1.6;
+    }
+
+    @keyframes neonPulse {
+      0%, 100% { text-shadow: 0 0 8px #0ff, 0 0 20px #0ff; opacity: 1; }
+      50%       { text-shadow: 0 0 4px #0ff, 0 0 10px #0ff; opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="nc-wrap">
+
+  <div class="nc-title">
+    <i class="ti ti-calculator" style="font-size:16px;" aria-hidden="true"></i>
+    troll calc 3000
+    <span class="glitchy">&#9632; glitchy</span>
+  </div>
+
+  <div class="nc-body">
+    <div class="nc-display">
+      <div class="scanline"></div>
+      <div class="nc-disp-input" id="disp">0_</div>
+      <div class="nc-disp-hint" id="hint"></div>
+    </div>
+
+    <div class="nc-grid">
+      <button class="nb clear" onclick="pressKey('C')">C</button>
+      <button class="nb op"    onclick="pressKey('±')">±</button>
+      <button class="nb op"    onclick="pressKey('%')">%</button>
+      <button class="nb op"    onclick="pressKey('/')">÷</button>
+
+      <button class="nb" onclick="pressKey('7')">7</button>
+      <button class="nb" onclick="pressKey('8')">8</button>
+      <button class="nb" onclick="pressKey('9')">9</button>
+      <button class="nb op" onclick="pressKey('*')">×</button>
+
+      <button class="nb" onclick="pressKey('4')">4</button>
+      <button class="nb" onclick="pressKey('5')">5</button>
+      <button class="nb" onclick="pressKey('6')">6</button>
+      <button class="nb op" onclick="pressKey('-')">−</button>
+
+      <button class="nb" onclick="pressKey('1')">1</button>
+      <button class="nb" onclick="pressKey('2')">2</button>
+      <button class="nb" onclick="pressKey('3')">3</button>
+      <button class="nb op" onclick="pressKey('+')">+</button>
+
+      <button class="nb zero" onclick="pressKey('0')">0</button>
+      <button class="nb"      onclick="pressKey('.')">.</button>
+      <button class="nb eq"   onclick="pressKey('=')">=</button>
+    </div>
+  </div>
+
+  <div class="nc-banner" id="banner"></div>
+
+</div>
+
+<script>
+  let expr = '';
+  let justEvaled = false;
+  let cursorInterval;
+
+  const trollAnswers = [
+    () => "six seven",
+    () => "idk man ask your girl, shes always right!",
+    () => `${Math.floor(Math.random() * 999) + 1} — fabricated. sounds legit tho.`,
+    () => "bold of u to think i do math.",
+    () => "fuck off",
+    () => "calculated it... nope, dropped it.",
+    () => "my horoscope says 7. close enough.",
+    () => "nai pata mujhe",
+    () => `definitely ${Math.floor(Math.random() * 100)}. don't @ me.`,
+    () => "khud guess karlo",
+    () => "i asked my cat. she said no.",
+    () => "economy bad. can't afford to compute.",
+    () => "chutiya hai kya?",
+    () => "NaN. not a number. not my problem.",
+    () => "i'm legally not allowed to answer.",
+    () => "chandani raat me goli chala gya, leke donali haath me",
+    () => "therapist said stop doing arithmetic.",
+    () => "ran the numbers. the numbers ran away.",
+    () => `exactly ${Math.floor(Math.random() * 10000)}. very confident.`,
+    () => "above my pay grade. sorry not sorry.",
+    () => "universe = chaos. answer = chaos.",
+    () => "three. final answer. no backsies.",
+    () => "googled it. wifi bad. mystery forever.",
+    () => "itna nai aata kya tujhe chutiye",
+    () => "funny u asked. i don't care.",
+  ];
+
+  const hints = [
+    "// trust me bro",
+    "// certified answer™",
+    "// peer-reviewed by my dog",
+    "// vibes-based result",
+    "// backed by zero research",
+    "// mathematically irrelevant",
+    "// results may vary wildly",
+    "// do not cite this",
+  ];
+
+  const quips = [
+    "> u really thought i'd do real math? cute.",
+    "> calculator.exe encountered: caring. crash.",
+    "> this machine runs on chaos, not arithmetic.",
+    "> ur faith in tech is touching. wrong. but touching.",
+    "> computed with my heart, not my brain.",
+    "> math is a social construct. i reject it.",
+    "> error: too many digits, not enough vibes.",
+    "> i am a troll. this is a troll calculator.",
+  ];
+
+  function getRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function startCursor() {
+    clearInterval(cursorInterval);
+    const d = document.getElementById('disp');
+    let on = true;
+    cursorInterval = setInterval(() => {
+      const txt = d.textContent.replace(/_$/, '');
+      d.textContent = on ? txt + '_' : txt;
+      on = !on;
+    }, 530);
+  }
+
+  function stopCursor() {
+    clearInterval(cursorInterval);
+    const d = document.getElementById('disp');
+    d.textContent = d.textContent.replace(/_$/, '');
+  }
+
+  function setDisplay(txt) {
+    stopCursor();
+    document.getElementById('disp').textContent = txt;
+    startCursor();
+  }
+
+  function pressKey(k) {
+    const hint   = document.getElementById('hint');
+    const banner = document.getElementById('banner');
+
+    if (k === 'C') {
+      expr = '';
+      setDisplay('0');
+      hint.textContent   = '';
+      banner.textContent = '';
+      justEvaled = false;
+      return;
+    }
+
+    if (k === '=') {
+      if (!expr) return;
+      stopCursor();
+      document.getElementById('disp').textContent = getRandom(trollAnswers)();
+      hint.textContent   = getRandom(hints);
+      banner.textContent = '';
+      setTimeout(() => { banner.textContent = getRandom(quips); }, 400);
+      expr = '';
+      justEvaled = true;
+      return;
+    }
+
+    if (justEvaled) { expr = ''; justEvaled = false; }
+
+    if (k === '±') {
+      if (expr.startsWith('-')) expr = expr.slice(1);
+      else if (expr) expr = '-' + expr;
+    } else if (k === '%') {
+      expr += '%';
+    } else {
+      expr += k;
+    }
+
+    const show = expr
+      .replace(/\*/g, '×')
+      .replace(/\//g, '÷')
+      .replace(/-/g, '−');
+
+    setDisplay(show || '0');
+    hint.textContent   = '';
+    banner.textContent = '';
+  }
+  startCursor();
+</script>
+</body>
+</html>
