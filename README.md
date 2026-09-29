@@ -42,7 +42,7 @@ It looks like a calculator. It acts like a calculator. It is not a calculator.
 Just open the file. That's it.
 
 ````bash
-git clone https://github.com/harshh-vs/troll-calculator.git
+git clone  https://harshh-vs.github.io/Troll-Calculator/
 cd troll-calculator
 open troll_calculator_neon.html   # or double-click it
 ````
